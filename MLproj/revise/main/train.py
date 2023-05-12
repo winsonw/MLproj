@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
-from network import SimpleCNN
+from simpleCNN import SimpleCNN
 from data import load_data
 import os
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
@@ -70,8 +70,8 @@ class Trainer:
         return losses
 
 
-def main(train=True):
-    model = SimpleCNN(num_class=10)
+def main(train=True, model_class=SimpleCNN):
+    model = model_class(num_class=10)
     parameters = {
         "device": torch.device("cuda" if torch.cuda.is_available() else "cpu"),
         "num_epoch": 2,
@@ -92,4 +92,5 @@ def main(train=True):
 
 
 if __name__ == '__main__':
-    main(False)
+    main()
+    # SimpleCNN(False)
