@@ -9,10 +9,11 @@ os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 
 class Trainer:
-    def __init__(self, model, parameters, train_loader):
+    def __init__(self, model, parameters, train_loader, val_loader):
         self.model = model
         self.parameters = parameters
         self.train_loader = train_loader
+        self.val_loader = val_loader
 
         self.device = self.parameters["device"]
         self.num_epoch = self.parameters["num_epoch"]
@@ -20,19 +21,21 @@ class Trainer:
         self.loss_function = nn.CrossEntropyLoss()
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.lr)
 
-        self.losses = []
+        self.losses = [[],[]]
 
     def save_model(self, path):
         torch.save(self.model.state_dict(), path + "/simpleCNN.pt")
 
     def load_model(self, path):
-        self.model.load_stat_dict(torch.load(path + "/simpleCNN.pt"))
+        self.model.load_state_dict(torch.load(path + "/simpleCNN.pt"))
 
     def plot(self):
-        plt.plot(self.losses)
+        plt.plot(self.losses[0])
+        plt.plot(self.losses[1])
         plt.show()
 
     def train(self):
+        num_train, num_val = len(self.train_loader), len(self.val_loader)
         for epoch in range(self.num_epoch):
             train_loss = 0.0
             for i, (images, label) in enumerate(self.train_loader):
@@ -48,7 +51,8 @@ class Trainer:
 
                 loss.backward()
                 self.optimizer.step()
-            self.losses.append(train_loss)
+            self.losses[0].append(train_loss/num_train)
+            self.losses[1].append(self.evaluate(self.val_loader) / num_val)
 
     def evaluate(self, dataloader):
         self.model.eval()
@@ -66,23 +70,26 @@ class Trainer:
         return losses
 
 
-def main():
+def main(train=True):
     model = SimpleCNN(num_class=10)
     parameters = {
         "device": torch.device("cuda" if torch.cuda.is_available() else "cpu"),
-        "num_epoch": 10,
+        "num_epoch": 2,
         "lr": 0.001,
     }
 
     train_loader, val_loader, test_loader = load_data("../data")
-    trainer = Trainer(model, parameters, train_loader)
+    trainer = Trainer(model, parameters, train_loader, val_loader)
 
-    trainer.train()
-    trainer.save_model("../model_para")
-    trainer.plot()
+    if train:
+        trainer.train()
+        trainer.save_model("../model_para")
+        trainer.plot()
+    else:
+        trainer.load_model("../model_para")
 
-    print(trainer.evaluate(test_loader))
+    print(trainer.evaluate(test_loader) / len(test_loader))
 
 
 if __name__ == '__main__':
-    main()
+    main(False)
