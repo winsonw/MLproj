@@ -4,6 +4,8 @@ import torch.optim as optim
 import matplotlib.pyplot as plt
 from network import SimpleCNN
 from data import load_data
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 
 class Trainer:
@@ -21,10 +23,10 @@ class Trainer:
         self.losses = []
 
     def save_model(self, path):
-        torch.save(self.model.state_dict(), path + "/simpleCNN.pth")
+        torch.save(self.model.state_dict(), path + "/simpleCNN.pt")
 
     def load_model(self, path):
-        self.model.load_stat_dict(torch.load(path + "/simpleCNN.pth"))
+        self.model.load_stat_dict(torch.load(path + "/simpleCNN.pt"))
 
     def plot(self):
         plt.plot(self.losses)
@@ -48,6 +50,21 @@ class Trainer:
                 self.optimizer.step()
             self.losses.append(train_loss)
 
+    def evaluate(self, dataloader):
+        self.model.eval()
+        losses = 0.0
+
+        with torch.no_grad():
+            for images, label in dataloader:
+                images = images.to(self.device)
+                label = label.to(self.device)
+
+                predict = self.model(images)
+                loss = self.loss_function(predict, label)
+                losses += loss
+
+        return losses
+
 
 def main():
     model = SimpleCNN(num_class=10)
@@ -61,6 +78,10 @@ def main():
     trainer = Trainer(model, parameters, train_loader)
 
     trainer.train()
+    trainer.save_model("../model_para")
+    trainer.plot()
+
+    print(trainer.evaluate(test_loader))
 
 
 if __name__ == '__main__':
