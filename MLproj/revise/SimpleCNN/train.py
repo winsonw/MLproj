@@ -1,5 +1,4 @@
-from torchvision.datasets import ImageFolder
-from torch.utils.data import DataLoader
+import torch
 
 
 def train():
