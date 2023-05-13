@@ -72,13 +72,14 @@ class Trainer:
 def main(train=True, name_model="SimpleCNN"):
     data_path = "../data"
     model_path = "../model_para"
+    name_dataset = "CIFAR10"
     # name_model = "SimpleCNN"
     name_model = "Unet"
     train = True
 
     parameters = Config.get_train_config(name_model)
 
-    train_loader, val_loader, test_loader = data.load_all_data(data_path)
+    train_loader, val_loader, test_loader = data.load_all_data(data_path, name_dataset)
     trainer = Trainer(parameters)
 
     if train:
