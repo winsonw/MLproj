@@ -74,7 +74,8 @@ def main(train=True, name_model="SimpleCNN"):
     model_path = "../model_para"
     name_dataset = "CIFAR10"
     # name_model = "SimpleCNN"
-    name_model = "Unet"
+    # name_model = "Unet"
+    name_model = "ResNet"
     batch_size = 64
     train = True
 
