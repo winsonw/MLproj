@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
-from data import load_data
+import data
 from config import Config
 import os
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
@@ -72,12 +72,13 @@ class Trainer:
 def main(train=True, name_model="SimpleCNN"):
     data_path = "../data"
     model_path = "../model_para"
-    name_model = "SimpleCNN"
+    # name_model = "SimpleCNN"
+    name_model = "Unet"
     train = True
 
     parameters = Config.get_train_config(name_model)
 
-    train_loader, val_loader, test_loader = load_data(data_path)
+    train_loader, val_loader, test_loader = data.load_all_data(data_path)
     trainer = Trainer(parameters)
 
     if train:
