@@ -75,11 +75,12 @@ def main(train=True, name_model="SimpleCNN"):
     name_dataset = "CIFAR10"
     # name_model = "SimpleCNN"
     name_model = "Unet"
+    batch_size = 64
     train = True
 
     parameters = Config.get_train_config(name_model)
 
-    train_loader, val_loader, test_loader = data.load_all_data(data_path, name_dataset)
+    train_loader, val_loader, test_loader = data.load_all_data(data_path, batch_size, name_dataset)
     trainer = Trainer(parameters)
 
     if train:
