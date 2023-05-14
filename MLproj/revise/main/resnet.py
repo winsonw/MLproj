@@ -37,16 +37,15 @@ class ResNet(nn.Module):
             nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
         )
 
-        self.layer1 = self.make_layer(64, 64, 1, 2)
-        self.layer2 = self.make_layer(64, 128, 2, 2)
-        self.layer3 = self.make_layer(128, 256, 2, 2)
-        self.layer4 = self.make_layer(256, 512, 2, 2)
+        self.layer1 = self.make_layer(64, 64, 1, arg["layers"][0])
+        self.layer2 = self.make_layer(64, 128, 2, arg["layers"][1])
+        self.layer3 = self.make_layer(128, 256, 2, arg["layers"][2])
+        self.layer4 = self.make_layer(256, 512, 2, arg["layers"][3])
 
         self.fc = nn.Sequential(
-            nn.AdaptiveAvgPool2d((1,1)),
+            nn.AdaptiveAvgPool2d((1, 1)),
             nn.Flatten(),
-            # nn.Conv2d(512, arg["num_class"]),
-            nn.Linear(512, 10)
+            nn.Linear(512, arg["num_class"]),
         )
 
     def make_layer(self, in_channels, out_channels, stride, num_layer):

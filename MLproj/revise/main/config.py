@@ -45,5 +45,6 @@ class Config:
                 "lr": 0.001,
                 "loss_function": nn.CrossEntropyLoss,
                 "optimizer": optim.Adam,
+                "layers": [2, 2, 2, 2]
             }
             return parameter
