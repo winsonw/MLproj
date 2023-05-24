@@ -1,6 +1,6 @@
 from simpleCNN import SimpleCNN
 from unet import Unet
-from resnet import ResNet
+from resnet import ResNet, BottleneckBlock, ResidualBock
 from vit import VisionTransformer
 import torch
 import torch.nn as nn
@@ -40,13 +40,32 @@ class Config:
             parameter = {
                 "model": ResNet,
                 "name_model": "ResNet",
+                "res_block": ResidualBlock,
                 "num_class": 10,
                 "device": torch.device("cuda" if torch.cuda.is_available() else "cpu"),
                 "num_epoch": 2,
                 "lr": 0.001,
                 "loss_function": nn.CrossEntropyLoss,
                 "optimizer": optim.Adam,
-                "layers": [2, 2, 2, 2]
+                "layers": [2, 2, 2, 2],
+                "d_ff": 500,
+            }
+            return parameter
+
+        if neural_network == "ResNet50":
+            parameter = {
+                "model": ResNet,
+                "name_model": "ResNet50",
+                "res_block": BottleneckBlock,
+                "num_class": 10,
+                "device": torch.device("cuda" if torch.cuda.is_available() else "cpu"),
+                "num_epoch": 2,
+                "lr": 0.001,
+                "loss_function": nn.CrossEntropyLoss,
+                "optimizer": optim.Adam,
+                "d_ff": 1000,
+                "bottleneck_channels": [64, 128, 256, 512],
+                "layers": [3, 4, 6, 3]
             }
             return parameter
 

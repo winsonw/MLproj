@@ -23,17 +23,18 @@ class ResidualBlock(nn.Module):
 
     def forward(self, x):
         residual, out = self.projection(x), self.layers(x)
-        return self.activation(out+residual)
+        return self.activation(out + residual)
 
 
-class Bottleneck(nn.Module):
-    def __init__(self, in_channels=256, out_channels=256, bottleneck_channel=64, stride=1):
-        super(Bottleneck, self).__init__()
+class BottleneckBlock(nn.Module):
+    def __init__(self, in_channels=64, bottleneck_channel=64, stride=1):
+        super(BottleneckBlock, self).__init__()
+        out_channels = bottleneck_channel*4
         self.layers = nn.Sequential(
             nn.Conv2d(in_channels, bottleneck_channel, kernel_size=1, stride=1),
             nn.BatchNorm2d(bottleneck_channel),
             nn.ReLU(),
-            nn.Conv2d(bottleneck_channel, bottleneck_channel, kernel_size=3, stride=stride),
+            nn.Conv2d(bottleneck_channel, bottleneck_channel, kernel_size=3, stride=stride, padding=1),
             nn.BatchNorm2d(bottleneck_channel),
             nn.ReLU(),
             nn.Conv2d(bottleneck_channel, out_channels, kernel_size=1, stride=1),
@@ -65,21 +66,27 @@ class ResNet(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
         )
-
-        self.layer1 = self.make_layer(64, 64, 1, arg["layers"][0])
-        self.layer2 = self.make_layer(64, 128, 2, arg["layers"][1])
-        self.layer3 = self.make_layer(128, 256, 2, arg["layers"][2])
-        self.layer4 = self.make_layer(256, 512, 2, arg["layers"][3])
+        self.block = arg["res_block"]
+        if arg["name_model"] == "ResNet":
+            self.layer1 = self.make_layer(64, 64, 1, arg["layers"][0])
+            self.layer2 = self.make_layer(64, 128, 2, arg["layers"][1])
+            self.layer3 = self.make_layer(128, 256, 2, arg["layers"][2])
+            self.layer4 = self.make_layer(256, 512, 2, arg["layers"][3])
+        else:
+            self.layer1 = self.make_layer(64, 64, 1, arg["layers"][0])
+            self.layer2 = self.make_layer(256, 128, 2, arg["layers"][1])
+            self.layer3 = self.make_layer(512, 256, 2, arg["layers"][2])
+            self.layer4 = self.make_layer(1024, 512, 2, arg["layers"][3])
 
         self.fc = nn.Sequential(
             nn.AdaptiveAvgPool2d((1, 1)),
             nn.Flatten(),
-            nn.Linear(512, arg["num_class"]),
+            nn.Linear(arg["d_ff"], arg["num_class"]),
         )
 
     def make_layer(self, in_channels, out_channels, stride, num_layer):
         layers = []
-        layers.append(ResidualBlock(in_channels, out_channels, stride))
+        layers.append(self.block(in_channels, out_channels, stride))
         for _ in range(1, num_layer):
             layers.append(ResidualBlock(out_channels, out_channels))
         return nn.Sequential(*layers)
