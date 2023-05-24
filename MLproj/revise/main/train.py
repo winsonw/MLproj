@@ -4,15 +4,17 @@ import torch.optim as optim
 import matplotlib.pyplot as plt
 import data
 from config import Config
+from torch.utils.tensorboard import SummaryWriter
 import os
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 
 class Trainer:
-    def __init__(self, arg, model=None):
+    def __init__(self, arg, model=None, writer=None):
         # self.parameters =arg
         # lr = arg["lr"]
         # num_class = arg["num_class"]
+        self.writer = SummaryWriter() if writer is None else writer
         self.name_model = arg["name_model"]
         self.device = arg["device"]
         if model is None:
@@ -43,8 +45,11 @@ class Trainer:
 
                 loss.backward()
                 self.optimizer.step()
-            self.train_losses.append(train_loss/num_train)
-            self.val_losses.append(self.evaluate(val_loader) / num_val)
+
+            self.writer.add_scalar("training loss", train_loss/num_train, epoch)
+            self.writer.add_scalar("validation loss", self.evaluate(val_loader) / num_val, epoch)
+            # self.train_losses.append(train_loss/num_train)
+            # self.val_losses.append(self.evaluate(val_loader) / num_val)
 
     def evaluate(self, dataloader):
         self.model.eval()
@@ -67,14 +72,15 @@ class Trainer:
     def load_model(self, path):
         self.model.load_state_dict(torch.load(path + self.name_model + ".pt"))
 
-    def plot(self):
-        plt.plot(self.train_losses, label="train_losses")
-        plt.plot(self.val_losses, label="val_losses")
-        plt.show()
+    # def plot(self):
+    #     plt.plot(self.train_losses, label="train_losses")
+    #     plt.plot(self.val_losses, label="val_losses")
+    #     plt.show()
 
 
 def main(train=True, name_model="SimpleCNN"):
     data_path = "../data"
+    log_path = "../log"
     model_path = "../model_para"
     name_dataset = "CIFAR10"
     # name_model = "SimpleCNN"
@@ -86,14 +92,15 @@ def main(train=True, name_model="SimpleCNN"):
     train = True
 
     parameters = Config.get_train_config(name_model)
+    writer = SummaryWriter("../log", comment=name_model)
 
     train_loader, val_loader, test_loader = data.load_all_data(data_path, batch_size, name_dataset)
     if name_model == "ViT":
         model = parameters["model"](d_model=256, d_ff=1024, h=8, image_size=32,
                                     patch_size=4, num_layers=6, num_classes=10)
-        trainer = Trainer(parameters, model)
+        trainer = Trainer(parameters, model, writer)
     else:
-        trainer = Trainer(parameters)
+        trainer = Trainer(parameters, writer)
 
     if train:
         trainer.train(train_loader, val_loader)
@@ -102,6 +109,7 @@ def main(train=True, name_model="SimpleCNN"):
     else:
         trainer.load_model(model_path)
 
+    writer.close()
     print(trainer.evaluate(test_loader) / len(test_loader))
 
 
