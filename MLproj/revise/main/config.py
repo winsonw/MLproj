@@ -1,6 +1,6 @@
 from simpleCNN import SimpleCNN
 from unet import Unet
-from resnet import ResNet, BottleneckBlock, ResidualBock
+from resnet import ResNet, BottleneckBlock, ResidualBlock
 from vit import VisionTransformer
 import torch
 import torch.nn as nn

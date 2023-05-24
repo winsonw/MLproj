@@ -72,23 +72,27 @@ class ResNet(nn.Module):
             self.layer2 = self.make_layer(64, 128, 2, arg["layers"][1])
             self.layer3 = self.make_layer(128, 256, 2, arg["layers"][2])
             self.layer4 = self.make_layer(256, 512, 2, arg["layers"][3])
+            last = 512
         else:
-            self.layer1 = self.make_layer(64, 64, 1, arg["layers"][0])
-            self.layer2 = self.make_layer(256, 128, 2, arg["layers"][1])
-            self.layer3 = self.make_layer(512, 256, 2, arg["layers"][2])
-            self.layer4 = self.make_layer(1024, 512, 2, arg["layers"][3])
+            self.layer1 = self.make_layer(64, 64, 1, arg["layers"][0], True)
+            self.layer2 = self.make_layer(256, 128, 2, arg["layers"][1], True)
+            self.layer3 = self.make_layer(512, 256, 2, arg["layers"][2], True)
+            self.layer4 = self.make_layer(1024, 512, 2, arg["layers"][3], True)
+            last = 512*4
 
         self.fc = nn.Sequential(
             nn.AdaptiveAvgPool2d((1, 1)),
             nn.Flatten(),
+            nn.Linear(last, arg["d_ff"]),
+            nn.ReLU(),
             nn.Linear(arg["d_ff"], arg["num_class"]),
         )
 
-    def make_layer(self, in_channels, out_channels, stride, num_layer):
+    def make_layer(self, in_channels, out_channels, stride, num_layer, is_bottleneck=False):
         layers = []
         layers.append(self.block(in_channels, out_channels, stride))
         for _ in range(1, num_layer):
-            layers.append(ResidualBlock(out_channels, out_channels))
+            layers.append(self.block(out_channels * (4 if is_bottleneck else 1), out_channels))
         return nn.Sequential(*layers)
 
     def forward(self, x):

@@ -16,7 +16,7 @@ class Trainer:
         self.name_model = arg["name_model"]
         self.device = arg["device"]
         if model is None:
-            self.model = arg["model"](arg["num_class"])
+            self.model = arg["model"](arg)
         else:
             self.model = model
         self.model.to(self.device)
@@ -80,7 +80,8 @@ def main(train=True, name_model="SimpleCNN"):
     # name_model = "SimpleCNN"
     # name_model = "Unet"
     # name_model = "ResNet"
-    name_model = "ViT"
+    # name_model = "ViT"
+    name_model = "ResNet50"
     batch_size = 64
     train = True
 
