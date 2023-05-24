@@ -14,10 +14,12 @@ class Trainer:
         # lr = arg["lr"]
         # num_class = arg["num_class"]
         self.name_model = arg["name_model"]
+        self.device = arg["device"]
         if model is None:
             self.model = arg["model"](arg["num_class"])
-        self.model = model
-        self.device = arg["device"]
+        else:
+            self.model = model
+        self.model.to(self.device)
         self.num_epoch = arg["num_epoch"]
         self.loss_function = arg["loss_function"]()
         self.optimizer = arg["optimizer"](self.model.parameters(), lr=arg["lr"])
@@ -86,7 +88,8 @@ def main(train=True, name_model="SimpleCNN"):
 
     train_loader, val_loader, test_loader = data.load_all_data(data_path, batch_size, name_dataset)
     if name_model == "ViT":
-        model = parameters["model"](d_model=256, d_ff=1024, h=8, image_size=32, patch_size=4, num_layers=6, num_classes=10)
+        model = parameters["model"](d_model=256, d_ff=1024, h=8, image_size=32,
+                                    patch_size=4, num_layers=6, num_classes=10)
         trainer = Trainer(parameters, model)
     else:
         trainer = Trainer(parameters)
