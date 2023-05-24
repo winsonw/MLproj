@@ -12,18 +12,47 @@ class ResidualBlock(nn.Module):
             nn.BatchNorm2d(out_channels),
         )
         if stride != 1 or in_channels != out_channels:
-            self.identity = nn.Sequential(
+            self.projection = nn.Sequential(
                 nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=stride),
                 nn.BatchNorm2d(out_channels),
             )
         else:
-            self.identity = nn.Identity()
+            self.projection = nn.Identity()
 
         self.activation = nn.ReLU()
 
     def forward(self, x):
-        residual, out = self.identity(x), self.layers(x)
+        residual, out = self.projection(x), self.layers(x)
         return self.activation(out+residual)
+
+
+class Bottleneck(nn.Module):
+    def __init__(self, in_channels=256, out_channels=256, bottleneck_channel=64, stride=1):
+        super(Bottleneck, self).__init__()
+        self.layers = nn.Sequential(
+            nn.Conv2d(in_channels, bottleneck_channel, kernel_size=1, stride=1),
+            nn.BatchNorm2d(bottleneck_channel),
+            nn.ReLU(),
+            nn.Conv2d(bottleneck_channel, bottleneck_channel, kernel_size=3, stride=stride),
+            nn.BatchNorm2d(bottleneck_channel),
+            nn.ReLU(),
+            nn.Conv2d(bottleneck_channel, out_channels, kernel_size=1, stride=1),
+            nn.BatchNorm2d(out_channels),
+        )
+
+        if stride != 1 or in_channels != out_channels:
+            self.projection = nn.Sequential(
+                nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=stride),
+                nn.BatchNorm2d(out_channels)
+            )
+        else:
+            self.projection = nn.Identity()
+
+        self.act = nn.ReLU()
+
+    def forward(self, x):
+        x = self.projection(x) + self.layers(x)
+        return self.act(x)
 
 
 class ResNet(nn.Module):
