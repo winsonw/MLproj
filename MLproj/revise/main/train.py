@@ -9,12 +9,14 @@ os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 
 class Trainer:
-    def __init__(self, arg):
+    def __init__(self, arg, model=None):
         # self.parameters =arg
         # lr = arg["lr"]
         # num_class = arg["num_class"]
         self.name_model = arg["name_model"]
-        self.model = arg["model"](arg["num_class"])
+        if model is None:
+            self.model = arg["model"](arg["num_class"])
+        self.model = model
         self.device = arg["device"]
         self.num_epoch = arg["num_epoch"]
         self.loss_function = arg["loss_function"]()
@@ -75,14 +77,19 @@ def main(train=True, name_model="SimpleCNN"):
     name_dataset = "CIFAR10"
     # name_model = "SimpleCNN"
     # name_model = "Unet"
-    name_model = "ResNet"
+    # name_model = "ResNet"
+    name_model = "ViT"
     batch_size = 64
     train = True
 
     parameters = Config.get_train_config(name_model)
 
     train_loader, val_loader, test_loader = data.load_all_data(data_path, batch_size, name_dataset)
-    trainer = Trainer(parameters)
+    if name_model == "ViT":
+        model = parameters["model"](d_model=256, d_ff=1024, h=8, image_size=32, patch_size=4, num_layers=6, num_classes=10)
+        trainer = Trainer(parameters, model)
+    else:
+        trainer = Trainer(parameters)
 
     if train:
         trainer.train(train_loader, val_loader)

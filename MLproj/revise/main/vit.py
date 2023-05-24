@@ -31,7 +31,7 @@ class EncodeBlock(nn.Module):
 
 
 class VisionTransformer(nn.Module):
-    def __init__(self, d_model, d_ff, h,  image_size, patch_size, num_layers, trm=EncodeBlock, in_channel=3, dropout=0.1):
+    def __init__(self, d_model, d_ff, h,  image_size, patch_size, num_layers, trm=EncodeBlock, in_channel=3, dropout=0.1, num_classes=10):
         super(VisionTransformer, self).__init__()
         num_patch = (image_size // patch_size) ** 2
 
@@ -40,9 +40,12 @@ class VisionTransformer(nn.Module):
         self.class_token = nn.Parameter(torch.randn((1, 1, d_model)))
         self.transformer_blocks = nn.ModuleList([trm(d_model, d_ff, h, dropout) for _ in range(num_layers)])
 
+        self.classification_head = nn.Linear(d_model, num_classes)
+
     def forward(self, x):
         x = self.patch_embedding(x)
         x = x.flatten(2).transpose(2, 1)  # [batch_size, num_patch, d_model]
+
         class_token = self.class_token.repeat(x.shape[0], 1, 1)
         x = torch.cat([class_token, x], dim=1)
 
@@ -51,12 +54,13 @@ class VisionTransformer(nn.Module):
         for layer in self.transformer_blocks:
             x = layer(x)
 
+        x = self.classification_head(x[:, 0])
         return x
 
 
 if __name__ == '__main__':
-    # Assume the input images have size 224x224 with 3 channels (RGB), and we are using 8 heads, 512-dimensional embeddings,
-    # and 6 layers in the transformer. The image is divided into patches of size 16x16.
+    # Assume the input images have size 224x224 with 3 channels (RGB), and we are using 8 heads,
+    # 512-dimensional embeddings, and 6 layers in the transformer. The image is divided into patches of size 16x16.
     model = VisionTransformer(d_model=512, d_ff=2048, h=8, image_size=224, patch_size=16, num_layers=6)
 
     # Assume we have a batch of 10 images
