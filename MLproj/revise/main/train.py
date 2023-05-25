@@ -26,7 +26,7 @@ class Trainer:
         self.loss_function = arg["loss_function"]()
         self.optimizer = arg["optimizer"](self.model.parameters(), lr=arg["lr"])
 
-        self.train_losses, self.val_losses = [], []
+        # self.train_losses, self.val_losses = [], []
 
     def train(self, train_loader, val_loader):
         num_train, num_val = len(train_loader), len(val_loader)
@@ -80,7 +80,9 @@ class Trainer:
 
 def main(train=True, name_model="SimpleCNN"):
     data_path = "../data"
+    # data_path = "hy-tmp"
     log_path = "../log"
+    # log_path = "tf-logs"
     model_path = "../model_para"
     name_dataset = "CIFAR10"
     # name_model = "SimpleCNN"
@@ -92,7 +94,7 @@ def main(train=True, name_model="SimpleCNN"):
     train = True
 
     parameters = Config.get_train_config(name_model)
-    writer = SummaryWriter("../log", comment=name_model)
+    writer = SummaryWriter(log_path, comment=name_model)
 
     train_loader, val_loader, test_loader = data.load_all_data(data_path, batch_size, name_dataset)
     if name_model == "ViT":
@@ -100,12 +102,12 @@ def main(train=True, name_model="SimpleCNN"):
                                     patch_size=4, num_layers=6, num_classes=10)
         trainer = Trainer(parameters, model, writer)
     else:
-        trainer = Trainer(parameters, writer)
+        trainer = Trainer(parameters, writer=writer)
 
     if train:
         trainer.train(train_loader, val_loader)
         trainer.save_model(model_path)
-        trainer.plot()
+        # trainer.plot()
     else:
         trainer.load_model(model_path)
 
