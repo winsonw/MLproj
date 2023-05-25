@@ -81,8 +81,8 @@ class Trainer:
 def main(train=True, name_model="SimpleCNN"):
     data_path = "../data"
     # data_path = "hy-tmp"
-    log_path = "../log"
-    # log_path = "tf-logs"
+    log_path = "../log/experiment1/"
+    # log_path = "tf-logs/runs/experiment1/"
     model_path = "../model_para"
     name_dataset = "CIFAR10"
     # name_model = "SimpleCNN"
