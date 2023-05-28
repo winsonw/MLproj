@@ -37,3 +37,12 @@ class PatchMerging(nn.Module):
         x = self.norm(x)
         x = self.linear(x)
         return x
+
+
+class ClassificationHead(nn.Module):
+    def __init__(self, in_channels, num_class):
+        super(ClassificationHead, self).__init__()
+        self.linear = nn.Linear(in_channels, num_class)
+
+    def forward(self, x):
+        return self.linear(x)
