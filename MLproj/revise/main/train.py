@@ -80,9 +80,10 @@ class Trainer:
 
 def main(train=True, name_model="SimpleCNN"):
     data_path = "../data"
-    # data_path = "hy-tmp"
+    # data_path = "hy-tmp/CIFAR/gi"
     log_path = "../log/experiment1/"
-    # log_path = "tf-logs/runs/experiment1/"
+    # log_path = "tf_logs/runs/"
+    experiment = "1"
     model_path = "../model_para"
     name_dataset = "CIFAR10"
     # name_model = "SimpleCNN"
@@ -94,7 +95,7 @@ def main(train=True, name_model="SimpleCNN"):
     train = True
 
     parameters = Config.get_train_config(name_model)
-    writer = SummaryWriter(log_path, comment=name_model)
+    writer = SummaryWriter(log_path + experiment, comment=name_model)
 
     train_loader, val_loader, test_loader = data.load_all_data(data_path, batch_size, name_dataset)
     if name_model == "ViT":
