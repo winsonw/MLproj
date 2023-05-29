@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch
+import numpy as np
 
 
 class PatchEmbedding(nn.Module):
@@ -46,3 +47,24 @@ class ClassificationHead(nn.Module):
 
     def forward(self, x):
         return self.linear(x)
+
+
+# class WindowAttention(nn.Module):
+#     def __init__(self, d_k, bias, in_channels, num_head, dropout=0.1):
+#         super(WindowAttention, self).__init__()
+#         self.scale = np.sqrt(d_k)
+#         self.bias = bias
+#         self.num_head = num_head
+#
+#         self.attn_qkv = nn.Linear(in_channels, in_channels*3)
+#         self.softmax = nn.Softmax()
+#         self.drop1 = nn.Dropout(dropout)
+#         self.linear = nn.Linear(in_channels, in_channels)
+#         self.drop2 = nn.Dropout(dropout)
+#
+#
+#     def forward(self, x):
+#         BnW, W2, C = x.shape
+#         q, k, v = self.attn_qkv(x).reshape(BnW, W2, 3, C // self.num_head, self.num_head).permute(2, 0, )
+
+
