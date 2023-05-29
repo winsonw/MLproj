@@ -49,6 +49,22 @@ class ClassificationHead(nn.Module):
         return self.linear(x)
 
 
+class MLP(nn.Module):
+    def __init__(self, in_channels, hidden_feature, out_channels, act_layer=nn.GELU, dropout=0.1):
+        super(MLP, self).__init__()
+        self.linear1 = nn.Linear(in_channels, hidden_feature)
+        self.act1 = act_layer()
+        self.drop1 = nn.Dropout(dropout)
+        self.linear2 = nn.Linear(hidden_feature, out_channels)
+        self.drop2 = nn.Dropout(dropout)
+
+    def forward(self, x):
+        x = self.linear1(x)
+        x = self.drop1(self.act1(x))
+        x = self.linear2(x)
+        return self.drop2(x)
+
+
 # class WindowAttention(nn.Module):
 #     def __init__(self, d_k, bias, in_channels, num_head, dropout=0.1):
 #         super(WindowAttention, self).__init__()
